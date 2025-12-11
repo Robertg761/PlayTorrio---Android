@@ -1,0 +1,38 @@
+{
+  "name": "com.ayman.playtorrio",
+  "version": "1.0.0",
+  "description": "PlayTorrio Android App",
+  "scripts": {
+    "build": "vite build",
+    "start": "npx cap serve"
+  },
+  "author": "Ayman",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor-community/http": "^1.4.1",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/app-launcher": "^7.0.2",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/filesystem": "^6.0.0",
+    "@capacitor/preferences": "^6.0.0",
+    "@ionic/pwa-elements": "^3.3.0",
+    "axios": "^1.7.4",
+    "buffer": "^6.0.3",
+    "capacitor-video-player": "^6.0.2",
+    "cheerio": "^1.0.0",
+    "crypto-browserify": "^3.12.1",
+    "events": "^3.3.0",
+    "hls.js": "^1.6.15",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "webtorrent": "^2.6.8"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.6",
+    "vite-plugin-node-polyfills": "^0.24.0"
+  }
+}

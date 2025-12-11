@@ -18,8 +18,9 @@ This roadmap outlines the steps to convert the existing PlayTorrio Windows deskt
     *   Install Android platform: `npm i @capacitor/android && npx cap add android`.
     *   Configure `capacitor.config.json` (app ID: `com.ayman.playtorrio`, name: `PlayTorrio`).
 *   [x] **Port Frontend Assets**
-    *   Copy contents of `public/` (index.html, css, js) to the Capacitor `dist` or `www` folder.
-    *   Identify and comment out Electron-specific code (`window.electronAPI`, `ipcRenderer`) in the frontend JS.
+    *   **Architecture Update:** Set up **Vite** build system with `android-app/src` directory.
+    *   Extracted inline JS from `index.html` to `src/js/main.js`.
+    *   Refactored code to eliminate Electron dependencies.
 
 ## Phase 2: Core Logic Porting (The Hard Part)
 
@@ -31,21 +32,20 @@ The backend (`server.mjs`, `api.cjs`) does heavy lifting. We need to move this l
     *   **Refactor:** Rewrite `axios` and `fetch` calls in the *frontend* (which currently call `localhost:6987`) to call the target APIs directly using the Capacitor HTTP plugin. This bypasses browser CORS restrictions on the device.
     *   *Key Task:* Port `api.cjs` scraping functions (like `anime_scrapePage`, `torrentio_api`) into a frontend utility module (e.g., `src/services/scraper.js`).
 
-*   [ ] **Torrent Engine (WebTorrent)**
+*   [x] **Torrent Engine (WebTorrent)**
     *   The app uses `webtorrent` in Node.js. WebTorrent also works in the browser (WebRTC), but hybrid apps often need TCP/UDP support for better peer discovery.
-    *   **Action:** Attempt to use `webtorrent` (browser version) first. Android WebView supports WebRTC.
+    *   **Action:** Successfully implemented `WebTorrent` client-side in `src/services/torrent.ts`.
     *   *Fallback:* If performance is poor, investigate a Capacitor torrent plugin, but pure JS WebTorrent is the first step.
-    *   **Storage:** Verify if we need to write files to disk. Capacitor `FileSystem` API will be needed to save downloads to the device's public media directories.
+    *   **Storage:** Using memory/blob storage for streaming currently.
 
-*   [ ] **Video Player Integration**
+*   [x] **Video Player Integration**
     *   The desktop app spawns MPV/VLC. This is impossible on Android directly.
-    *   **Action:** Use **Capacitor Video Player** (`capacitor-video-player`) or rely on the HTML5 `<video>` tag which is quite capable on Android.
-    *   *Intent:* For external players (VLC for Android), use Capacitor `AppLauncher` or `Intent` plugins to open stream URLs with `vlc://` or `intent://`.
+    *   **Action:** Implemented `src/services/player.ts` using `capacitor-video-player` for native playback.
+    *   *Intent:* Implemented `AppLauncher` support to open `vlc://` intents.
 
-*   [ ] **Settings & Persistence**
-    *   Current app uses `fs` to read/write JSON files in `userData`.
-    *   **Refactor:** Replace all `fs` reads/writes with `localStorage` (simplest) or Capacitor `Preferences` API (better).
-    *   Migrate `settings.json`, `my-list.json`, etc., to this new storage mechanism.
+*   [x] **Settings & Persistence**
+    *   **Refactor:** Replaced `fs`/`ipcRenderer` calls with a new `StorageService` using Capacitor `Preferences`.
+    *   Migrated `settings.json`, `my-list.json`, and `continue-watching.json` logic.
 
 ## Phase 3: Specific Feature Migration
 
@@ -61,30 +61,30 @@ The backend (`server.mjs`, `api.cjs`) does heavy lifting. We need to move this l
     *   The auth flow relies on polling. This logic (in `api.cjs`) is pure JS and HTTP, so it should port easily.
     *   Ensure the "Device Code" flow works within the mobile view.
 
-*   [ ] **BookTorrio (Books/Manga)**
-    *   Port the Z-Library and Manga scrapers.
-    *   Ensure the EPUB reader (which runs in an iframe or overlay) works on mobile screen sizes.
+*   [x] **BookTorrio (Books/Manga)**
+    *   Ported Z-Library and Manga scrapers to `BookService` using `CapacitorHttp`.
+    *   Updated `initializeBookTorrio` to use simpler client-side logic.
 
-*   [ ] **Music Downloader**
-    *   Current backend uses `ffmpeg` spawning for music conversion. **This will break.**
-    *   **Action:** Android cannot easily spawn `ffmpeg`.
-    *   *Alternative:*
-        *   Look for direct download links (FLAC/MP3) without conversion.
-        *   OR: Use `ffmpeg-wasm` if the device is powerful enough (experimental).
-        *   OR: Disable the "converter" part and only support direct streams/downloads.
+
+*   [x] **Music Downloader**
+    *   Current backend uses `ffmpeg` spawning for music conversion. **Refactored.**
+    *   **Action:** Migrated to strict **Direct Download** strategy in `MusicService`.
+    *   Replaced `ffmpeg` conversion with direct file downloads using `@capacitor-community/http` to `Documents/PlayTorrio/Music`.
+
 
 ## Phase 4: UI/UX Adaptation
 
-*   [ ] **Responsive Design**
+*   [x] **Responsive Design**
     *   The current UI (`public/index.html`) is desktop-first.
     *   **Action:** Add CSS media queries to `public/index.html` to ensure grids (movies, anime) stack properly on mobile screens.
     *   Fix the sidebar navigation to be a drawer/hamburger menu on mobile.
-*   [ ] **Touch Controls**
+*   [x] **Touch Controls**
     *   Ensure hover states (like on movie cards) have touch equivalents (e.g., tap to show details).
+    *   *Implementation:* Forced visibility of slider titles on mobile; tap interaction opens details modal.
 
 ## Phase 5: Build & Test
 
-*   [ ] **Android Build**
+*   [x] **Android Build Sync**
     *   Run `npx cap sync`.
     *   Open Android Studio: `npx cap open android`.
     *   Configure permissions in `AndroidManifest.xml` (Internet, Storage).
